@@ -1,20 +1,284 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{ title }}!
-  </h1>
-  <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-</div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-  </li>
-</ul>
+<nz-layout>
+    <nz-header>
+        <h1 style="color: aliceblue">Dockerfile Generator</h1>
+    </nz-header>
 
+    <nz-back-top></nz-back-top>
+
+    <nz-content style="padding: 2%">
+        <form [formGroup]="dockerFileForm">
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">基础镜像<span style="color: red">*</span>（FROM）</h2>
+                    <div class="form-group">
+                        <input nz-input type="text" formControlName="from" placeholder="例如：ubuntu:xenial">
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">维护者信息（MAINTAINER）</h2>
+                    <div class="form-group">
+                        <input nz-input type="text" formControlName="maintainer" placeholder="例如：Ary">
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">文件拷贝（COPY/ADD）</h2>
+                    <label>
+                        类型：
+                        <nz-radio-group [(ngModel)]="copyType" [ngModelOptions]="{standalone: true}" [nzButtonStyle]="'solid'">
+                            <label nz-radio-button nzValue="copy">COPY</label>
+                            <label nz-radio-button nzValue="add">ADD</label>
+                        </nz-radio-group>
+                    </label>
+                    <div class="form-array" formArrayName="copy">
+                        <button nz-button (mouseup)="addCopy()"><i nz-icon type="plus" theme="outline"></i></button>
+                        <div *ngFor="let address of copy.controls; let i = index">
+                            <div class="form-group" [formGroupName]="i">
+                                <div nz-row>
+                                    <div nz-col [nzSpan]="11">
+                                        <label>
+                                            本地路径
+                                            <input nz-input type="text" formControlName="localPath" placeholder="例如：./app.jar">
+                                        </label>
+                                    </div>
+                                    <div nz-col [nzSpan]="10" [nzOffset]="1">
+                                        <label>
+                                            容器路径（仅允许绝对路径）
+                                            <input nz-input type="text" formControlName="containerPath" placeholder="例如：/project/demo.jar">
+                                        </label>
+                                    </div>
+                                    <div nz-col [nzSpan]="1" [nzOffset]="1"><br>
+                                        <button nz-button style="display: inline-block" (mouseup)="removeCopy(i)"><i nz-icon type="minus" theme="outline"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">构建容器后执行的命令（CMD）</h2>
+                    <div class="form-group">
+                        <input nz-input type="text" formControlName="cmd" placeholder="例如：java -jar /project/demo.jar">
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">入口点（ENTRYPOINT）</h2>
+                    <div class="form-group">
+                        <input nz-input type="text" formControlName="entryPoint" placeholder="例如：java -jar /project/demo.jar">
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">工作目录（WORKDIR）</h2>
+                    <div class="form-group">
+                        <input nz-input type="text" formControlName="workDir" placeholder="例如：/project">
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">构建镜像时执行的命令（RUN）</h2>
+                    <div class="form-array" formArrayName="run">
+                        <button nz-button (mouseup)="addRun()"><i nz-icon type="plus" theme="outline"></i></button>
+                        <div *ngFor="let address of run.controls; let i = index">
+                            <div nz-row>
+                                <div nz-col [nzSpan]="22">
+                                    <input nz-input type="text" [formControlName]="i" placeholder="例如：java -jar ./demo.jar">
+                                </div>
+                                <div nz-col [nzSpan]="1" [nzOffset]="1">
+                                    <button nz-button (mouseup)="removeRun(i)"><i nz-icon type="minus" theme="outline"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">环境变量（ENV）</h2>
+                    <div class="form-array" formArrayName="env">
+                        <button nz-button (mouseup)="addEnv()"><i nz-icon type="plus" theme="outline"></i></button>
+                        <div *ngFor="let address of env.controls; let i = index">
+                            <div class="form-group" [formGroupName]="i">
+                                <div nz-row>
+                                    <div nz-col [nzSpan]="11">
+                                        <label>
+                                            Key
+                                            <input nz-input type="text" formControlName="key" placeholder="例如：name">
+                                        </label>
+                                    </div>
+                                    <div nz-col [nzSpan]="10" [nzOffset]="1">
+                                        <label>
+                                            Value
+                                            <input nz-input type="text" formControlName="value" placeholder="例如：ary">
+                                        </label>
+                                    </div>
+                                    <div nz-col [nzSpan]="1" [nzOffset]="1"><br>
+                                        <button nz-button (mouseup)="removeEnv(i)"><i nz-icon type="minus" theme="outline"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">端口（EXPOSE）</h2>
+                    <button nz-button (mouseup)="addExpose()"><i nz-icon type="plus" theme="outline"></i></button>
+                    <div class="form-array" formArrayName="expose">
+                        <div *ngFor="let address of expose.controls; let i = index">
+                            <div nz-row>
+                                <div nz-col [nzSpan]="22">
+                                    <input nz-input type="text" [formControlName]="i" placeholder="例如：8080">
+                                </div>
+                                <div nz-col [nzSpan]="1" [nzOffset]="1">
+                                    <button nz-button (mouseup)="removeExpose(i)"><i nz-icon type="minus" theme="outline"></i></button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">持久化目录（VOLUME）</h2>
+                    <div class="form-array" formArrayName="volume">
+                        <button nz-button (mouseup)="addVolume()"><i nz-icon type="plus" theme="outline"></i></button>
+                        <div *ngFor="let address of volume.controls; let i = index">
+                            <div nz-col [nzSpan]="22">
+                                <input nz-input type="text" [formControlName]="i" placeholder="例如：/data">
+                            </div>
+                            <div nz-col [nzSpan]="1" [nzOffset]="1">
+                                <button nz-button (mouseup)="removeVolume(i)"><i nz-icon type="minus" theme="outline"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">镜像触发器（ONBUILD）</h2>
+                    <nz-alert nzType="warning" nzMessage="ONBUILD下带'[ ]'的命令（如RUN、CMD）需要填写完整"></nz-alert><br>
+                    <div class="form-array" formArrayName="onBuild">
+                        <button nz-button (mouseup)="addOnBuild()"><i nz-icon type="plus" theme="outline"></i></button>
+                        <div *ngFor="let address of onBuild.controls; let i = index">
+                            <div nz-col [nzSpan]="22">
+                                <input nz-input type="text" [formControlName]="i" placeholder="例如：COPY ./app.jar /project/demo.jar">
+                            </div>
+                            <div nz-col [nzSpan]="1" [nzOffset]="1">
+                                <button nz-button (mouseup)="removeOnBuild(i)"><i nz-icon type="minus" theme="outline"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">运行用户（USER）</h2>
+                    <div class="form-group">
+                        <input nz-input type="text" formControlName="user" placeholder="例如：ary">
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">标签（LABEL）</h2>
+                    <div class="form-array" formArrayName="label">
+                        <button nz-button (mouseup)="addLabel()"><i nz-icon type="plus" theme="outline"></i></button>
+                        <div *ngFor="let address of label.controls; let i = index">
+                            <div class="form-group" [formGroupName]="i">
+                                <div nz-row>
+                                    <div nz-col [nzSpan]="11">
+                                        <label>
+                                            Key
+                                            <input nz-input type="text" formControlName="key" placeholder="例如：name">
+                                        </label>
+                                    </div>
+                                    <div nz-col [nzSpan]="10" [nzOffset]="1">
+                                        <label>
+                                            Value
+                                            <input nz-input type="text" formControlName="value" placeholder="例如：ary">
+                                        </label>
+                                    </div>
+                                    <div nz-col [nzSpan]="1" [nzOffset]="1"><br>
+                                        <button nz-button (mouseup)="removeLabel(i)"><i nz-icon type="minus" theme="outline"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div nz-row>
+                <div nz-col [nzSpan]="12" [nzOffset]="6">
+                    <h2 class="title">临时变量（ARG）</h2>
+                    <nz-alert nzType="warning" nzMessage="当前版本下ARG需要手动复制到需要的地方"></nz-alert><br>
+                    <div class="form-array" formArrayName="arg">
+                        <button nz-button (mouseup)="addArg()"><i nz-icon type="plus" theme="outline"></i></button>
+                        <div *ngFor="let address of arg.controls; let i = index">
+                            <div class="form-group" [formGroupName]="i">
+                                <div nz-row>
+                                    <div nz-col [nzSpan]="11">
+                                        <label>
+                                            Key
+                                            <input nz-input type="text" formControlName="key" placeholder="例如：name">
+                                        </label>
+                                    </div>
+                                    <div nz-col [nzSpan]="10" [nzOffset]="1">
+                                        <label>
+                                            Value
+                                            <input nz-input type="text" formControlName="value" placeholder="例如：ary(可为空)">
+                                        </label>
+                                    </div>
+                                    <div nz-col [nzSpan]="1" [nzOffset]="1"><br>
+                                        <button nz-button (mouseup)="removeArg(i)"><i nz-icon type="minus" theme="outline"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div nz-row>
+            <div nz-col [nzSpan]="12" [nzOffset]="6">
+                <div>
+                    <textarea nz-input [nzAutosize]="{ minRows: 5, maxRows: 10 }" [(ngModel)]="previewContent"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div nz-row>
+            <div nz-col [nzSpan]="12" [nzOffset]="6">
+                <button nz-button nzSize="large" nzType="primary" (mouseup)="preview()"><i nz-icon type="search" theme="outline"></i>预览</button>
+                <button nz-button nzSize="large" nzType="primary" ngxClipboard (mouseup)="copyPreview()" [disabled]="!previewContent"><i nz-icon type="copy" theme="outline"></i>复制</button>
+                <button nz-button nzSize="large" nzType="primary" (mouseup)="download()"  [disabled]="!previewContent"><i nz-icon type="download" theme="outline"></i>下载</button>
+                Designed By Ary <i nz-icon type="smile" theme="outline"></i>
+            </div>
+        </div>
+    </nz-content>
+</nz-layout>
