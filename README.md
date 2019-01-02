@@ -2,7 +2,7 @@
 
 项目由 [Angular CLI](https://github.com/angular/angular-cli) version 6.0.0 创建
 
-运行 `ng serve` 命令启动服务. 默认地址为 `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+运行 `ng serve` 命令启动服务. 默认地址为 `http://localhost:4200/`.
 
 ## 关于Dockerfile
 
